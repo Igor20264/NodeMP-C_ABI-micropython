@@ -63,15 +63,22 @@ static MP_DEFINE_CONST_FUN_OBJ_0(auto_get_player_count_obj, auto_get_player_coun
 
 static mp_obj_t auto_get_player_name(mp_obj_t a0) {
     nodemp_require(offsetof(NodeApi, get_player_name), "get_player_name");
-    int n = g_api->get_player_name(mp_obj_get_int(a0), NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_player_name(mp_obj_get_int(a0), buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_player_name(mp_obj_get_int(a0), stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_player_name(mp_obj_get_int(a0), NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_player_name(mp_obj_get_int(a0), buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(auto_get_player_name_obj, auto_get_player_name);
@@ -114,15 +121,22 @@ static MP_DEFINE_CONST_FUN_OBJ_1(auto_get_vehicle_damage_counter_obj, auto_get_v
 
 static mp_obj_t auto_get_vehicle_electrics_json(mp_obj_t a0) {
     nodemp_require(offsetof(NodeApi, get_vehicle_electrics_json), "get_vehicle_electrics_json");
-    int n = g_api->get_vehicle_electrics_json(mp_obj_get_int(a0), NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_vehicle_electrics_json(mp_obj_get_int(a0), buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_vehicle_electrics_json(mp_obj_get_int(a0), stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_vehicle_electrics_json(mp_obj_get_int(a0), NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_vehicle_electrics_json(mp_obj_get_int(a0), buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(auto_get_vehicle_electrics_json_obj, auto_get_vehicle_electrics_json);
@@ -183,15 +197,22 @@ static MP_DEFINE_CONST_FUN_OBJ_3(auto_set_vehicle_tag_obj, auto_set_vehicle_tag)
 
 static mp_obj_t auto_get_vehicle_tag(mp_obj_t a0, mp_obj_t a1) {
     nodemp_require(offsetof(NodeApi, get_vehicle_tag), "get_vehicle_tag");
-    int n = g_api->get_vehicle_tag(mp_obj_get_int(a0), nodemp_cstr(a1), NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_vehicle_tag(mp_obj_get_int(a0), nodemp_cstr(a1), buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_vehicle_tag(mp_obj_get_int(a0), nodemp_cstr(a1), stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_vehicle_tag(mp_obj_get_int(a0), nodemp_cstr(a1), NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_vehicle_tag(mp_obj_get_int(a0), nodemp_cstr(a1), buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_2(auto_get_vehicle_tag_obj, auto_get_vehicle_tag);
@@ -204,15 +225,22 @@ static MP_DEFINE_CONST_FUN_OBJ_2(auto_remove_vehicle_tag_obj, auto_remove_vehicl
 
 static mp_obj_t auto_get_vehicle_tags_json(mp_obj_t a0) {
     nodemp_require(offsetof(NodeApi, get_vehicle_tags_json), "get_vehicle_tags_json");
-    int n = g_api->get_vehicle_tags_json(mp_obj_get_int(a0), NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_vehicle_tags_json(mp_obj_get_int(a0), buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_vehicle_tags_json(mp_obj_get_int(a0), stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_vehicle_tags_json(mp_obj_get_int(a0), NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_vehicle_tags_json(mp_obj_get_int(a0), buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(auto_get_vehicle_tags_json_obj, auto_get_vehicle_tags_json);
@@ -239,45 +267,66 @@ static MP_DEFINE_CONST_FUN_OBJ_1(auto_clear_timer_obj, auto_clear_timer);
 
 static mp_obj_t auto_get_server_name(void) {
     nodemp_require(offsetof(NodeApi, get_server_name), "get_server_name");
-    int n = g_api->get_server_name(NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_server_name(buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_server_name(stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_server_name(NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_server_name(buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_0(auto_get_server_name_obj, auto_get_server_name);
 
 static mp_obj_t auto_get_map(void) {
     nodemp_require(offsetof(NodeApi, get_map), "get_map");
-    int n = g_api->get_map(NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_map(buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_map(stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_map(NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_map(buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_0(auto_get_map_obj, auto_get_map);
 
 static mp_obj_t auto_get_server_version(void) {
     nodemp_require(offsetof(NodeApi, get_server_version), "get_server_version");
-    int n = g_api->get_server_version(NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_server_version(buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_server_version(stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_server_version(NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_server_version(buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_0(auto_get_server_version_obj, auto_get_server_version);
@@ -302,15 +351,22 @@ static MP_DEFINE_CONST_FUN_OBJ_0(auto_get_max_cars_obj, auto_get_max_cars);
 
 static mp_obj_t auto_get_player_ip(mp_obj_t a0) {
     nodemp_require(offsetof(NodeApi, get_player_ip), "get_player_ip");
-    int n = g_api->get_player_ip(mp_obj_get_int(a0), NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_player_ip(mp_obj_get_int(a0), buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_player_ip(mp_obj_get_int(a0), stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_player_ip(mp_obj_get_int(a0), NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_player_ip(mp_obj_get_int(a0), buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(auto_get_player_ip_obj, auto_get_player_ip);
@@ -329,15 +385,22 @@ static MP_DEFINE_CONST_FUN_OBJ_2(auto_set_player_role_obj, auto_set_player_role)
 
 static mp_obj_t auto_get_player_role(mp_obj_t a0) {
     nodemp_require(offsetof(NodeApi, get_player_role), "get_player_role");
-    int n = g_api->get_player_role(mp_obj_get_int(a0), NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_player_role(mp_obj_get_int(a0), buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_player_role(mp_obj_get_int(a0), stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_player_role(mp_obj_get_int(a0), NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_player_role(mp_obj_get_int(a0), buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(auto_get_player_role_obj, auto_get_player_role);
@@ -368,105 +431,154 @@ static MP_DEFINE_CONST_FUN_OBJ_1(auto_is_ip_banned_obj, auto_is_ip_banned);
 
 static mp_obj_t auto_get_bans_json(void) {
     nodemp_require(offsetof(NodeApi, get_bans_json), "get_bans_json");
-    int n = g_api->get_bans_json(NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_bans_json(buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_bans_json(stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_bans_json(NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_bans_json(buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_0(auto_get_bans_json_obj, auto_get_bans_json);
 
 static mp_obj_t auto_get_vehicle_config_json(mp_obj_t a0) {
     nodemp_require(offsetof(NodeApi, get_vehicle_config_json), "get_vehicle_config_json");
-    int n = g_api->get_vehicle_config_json(mp_obj_get_int(a0), NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_vehicle_config_json(mp_obj_get_int(a0), buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_vehicle_config_json(mp_obj_get_int(a0), stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_vehicle_config_json(mp_obj_get_int(a0), NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_vehicle_config_json(mp_obj_get_int(a0), buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(auto_get_vehicle_config_json_obj, auto_get_vehicle_config_json);
 
 static mp_obj_t auto_get_vehicle_couplers_json(mp_obj_t a0) {
     nodemp_require(offsetof(NodeApi, get_vehicle_couplers_json), "get_vehicle_couplers_json");
-    int n = g_api->get_vehicle_couplers_json(mp_obj_get_int(a0), NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_vehicle_couplers_json(mp_obj_get_int(a0), buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_vehicle_couplers_json(mp_obj_get_int(a0), stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_vehicle_couplers_json(mp_obj_get_int(a0), NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_vehicle_couplers_json(mp_obj_get_int(a0), buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(auto_get_vehicle_couplers_json_obj, auto_get_vehicle_couplers_json);
 
 static mp_obj_t auto_get_vehicle_powertrain_json(mp_obj_t a0) {
     nodemp_require(offsetof(NodeApi, get_vehicle_powertrain_json), "get_vehicle_powertrain_json");
-    int n = g_api->get_vehicle_powertrain_json(mp_obj_get_int(a0), NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_vehicle_powertrain_json(mp_obj_get_int(a0), buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_vehicle_powertrain_json(mp_obj_get_int(a0), stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_vehicle_powertrain_json(mp_obj_get_int(a0), NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_vehicle_powertrain_json(mp_obj_get_int(a0), buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(auto_get_vehicle_powertrain_json_obj, auto_get_vehicle_powertrain_json);
 
 static mp_obj_t auto_get_vehicle_engine_json(mp_obj_t a0) {
     nodemp_require(offsetof(NodeApi, get_vehicle_engine_json), "get_vehicle_engine_json");
-    int n = g_api->get_vehicle_engine_json(mp_obj_get_int(a0), NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_vehicle_engine_json(mp_obj_get_int(a0), buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_vehicle_engine_json(mp_obj_get_int(a0), stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_vehicle_engine_json(mp_obj_get_int(a0), NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_vehicle_engine_json(mp_obj_get_int(a0), buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(auto_get_vehicle_engine_json_obj, auto_get_vehicle_engine_json);
 
 static mp_obj_t auto_get_vehicle_controllers_json(mp_obj_t a0) {
     nodemp_require(offsetof(NodeApi, get_vehicle_controllers_json), "get_vehicle_controllers_json");
-    int n = g_api->get_vehicle_controllers_json(mp_obj_get_int(a0), NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_vehicle_controllers_json(mp_obj_get_int(a0), buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_vehicle_controllers_json(mp_obj_get_int(a0), stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_vehicle_controllers_json(mp_obj_get_int(a0), NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_vehicle_controllers_json(mp_obj_get_int(a0), buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(auto_get_vehicle_controllers_json_obj, auto_get_vehicle_controllers_json);
 
 static mp_obj_t auto_get_world_snapshot_json(void) {
     nodemp_require(offsetof(NodeApi, get_world_snapshot_json), "get_world_snapshot_json");
-    int n = g_api->get_world_snapshot_json(NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_world_snapshot_json(buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_world_snapshot_json(stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_world_snapshot_json(NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_world_snapshot_json(buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_0(auto_get_world_snapshot_json_obj, auto_get_world_snapshot_json);
@@ -492,15 +604,22 @@ static MP_DEFINE_CONST_FUN_OBJ_3(auto_storage_set_obj, auto_storage_set);
 
 static mp_obj_t auto_storage_get(mp_obj_t a0, mp_obj_t a1) {
     nodemp_require(offsetof(NodeApi, storage_get), "storage_get");
-    int n = g_api->storage_get(nodemp_cstr(a0), nodemp_cstr(a1), NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->storage_get(nodemp_cstr(a0), nodemp_cstr(a1), buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->storage_get(nodemp_cstr(a0), nodemp_cstr(a1), stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->storage_get(nodemp_cstr(a0), nodemp_cstr(a1), NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->storage_get(nodemp_cstr(a0), nodemp_cstr(a1), buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_2(auto_storage_get_obj, auto_storage_get);
@@ -550,15 +669,22 @@ static MP_DEFINE_CONST_FUN_OBJ_2(auto_emit_resource_event_obj, auto_emit_resourc
 
 static mp_obj_t auto_get_metrics_json(void) {
     nodemp_require(offsetof(NodeApi, get_metrics_json), "get_metrics_json");
-    int n = g_api->get_metrics_json(NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_metrics_json(buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_metrics_json(stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_metrics_json(NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_metrics_json(buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_0(auto_get_metrics_json_obj, auto_get_metrics_json);
@@ -590,120 +716,176 @@ static MP_DEFINE_CONST_FUN_OBJ_1(auto_set_resource_owner_obj, auto_set_resource_
 
 static mp_obj_t auto_get_vehicle_json(mp_obj_t a0) {
     nodemp_require(offsetof(NodeApi, get_vehicle_json), "get_vehicle_json");
-    int n = g_api->get_vehicle_json(mp_obj_get_int(a0), NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_vehicle_json(mp_obj_get_int(a0), buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_vehicle_json(mp_obj_get_int(a0), stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_vehicle_json(mp_obj_get_int(a0), NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_vehicle_json(mp_obj_get_int(a0), buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(auto_get_vehicle_json_obj, auto_get_vehicle_json);
 
 static mp_obj_t auto_get_vehicles_json(void) {
     nodemp_require(offsetof(NodeApi, get_vehicles_json), "get_vehicles_json");
-    int n = g_api->get_vehicles_json(NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_vehicles_json(buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_vehicles_json(stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_vehicles_json(NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_vehicles_json(buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_0(auto_get_vehicles_json_obj, auto_get_vehicles_json);
 
 static mp_obj_t auto_get_players_json(void) {
     nodemp_require(offsetof(NodeApi, get_players_json), "get_players_json");
-    int n = g_api->get_players_json(NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_players_json(buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_players_json(stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_players_json(NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_players_json(buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_0(auto_get_players_json_obj, auto_get_players_json);
 
 static mp_obj_t auto_get_player_endpoint_json(mp_obj_t a0) {
     nodemp_require(offsetof(NodeApi, get_player_endpoint_json), "get_player_endpoint_json");
-    int n = g_api->get_player_endpoint_json(mp_obj_get_int(a0), NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_player_endpoint_json(mp_obj_get_int(a0), buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_player_endpoint_json(mp_obj_get_int(a0), stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_player_endpoint_json(mp_obj_get_int(a0), NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_player_endpoint_json(mp_obj_get_int(a0), buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(auto_get_player_endpoint_json_obj, auto_get_player_endpoint_json);
 
 static mp_obj_t auto_get_player_position_json(mp_obj_t a0) {
     nodemp_require(offsetof(NodeApi, get_player_position_json), "get_player_position_json");
-    int n = g_api->get_player_position_json(mp_obj_get_int(a0), NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_player_position_json(mp_obj_get_int(a0), buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_player_position_json(mp_obj_get_int(a0), stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_player_position_json(mp_obj_get_int(a0), NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_player_position_json(mp_obj_get_int(a0), buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(auto_get_player_position_json_obj, auto_get_player_position_json);
 
 static mp_obj_t auto_get_player_vehicle_json(mp_obj_t a0) {
     nodemp_require(offsetof(NodeApi, get_player_vehicle_json), "get_player_vehicle_json");
-    int n = g_api->get_player_vehicle_json(mp_obj_get_int(a0), NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_player_vehicle_json(mp_obj_get_int(a0), buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_player_vehicle_json(mp_obj_get_int(a0), stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_player_vehicle_json(mp_obj_get_int(a0), NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_player_vehicle_json(mp_obj_get_int(a0), buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(auto_get_player_vehicle_json_obj, auto_get_player_vehicle_json);
 
 static mp_obj_t auto_get_vehicle_damage_json(mp_obj_t a0) {
     nodemp_require(offsetof(NodeApi, get_vehicle_damage_json), "get_vehicle_damage_json");
-    int n = g_api->get_vehicle_damage_json(mp_obj_get_int(a0), NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_vehicle_damage_json(mp_obj_get_int(a0), buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_vehicle_damage_json(mp_obj_get_int(a0), stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_vehicle_damage_json(mp_obj_get_int(a0), NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_vehicle_damage_json(mp_obj_get_int(a0), buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(auto_get_vehicle_damage_json_obj, auto_get_vehicle_damage_json);
 
 static mp_obj_t auto_get_vehicle_occupants_json(mp_obj_t a0) {
     nodemp_require(offsetof(NodeApi, get_vehicle_occupants_json), "get_vehicle_occupants_json");
-    int n = g_api->get_vehicle_occupants_json(mp_obj_get_int(a0), NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_vehicle_occupants_json(mp_obj_get_int(a0), buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_vehicle_occupants_json(mp_obj_get_int(a0), stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_vehicle_occupants_json(mp_obj_get_int(a0), NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_vehicle_occupants_json(mp_obj_get_int(a0), buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(auto_get_vehicle_occupants_json_obj, auto_get_vehicle_occupants_json);
@@ -716,45 +898,66 @@ static MP_DEFINE_CONST_FUN_OBJ_1(auto_reload_resource_obj, auto_reload_resource)
 
 static mp_obj_t auto_get_vehicle_transform_json(mp_obj_t a0) {
     nodemp_require(offsetof(NodeApi, get_vehicle_transform_json), "get_vehicle_transform_json");
-    int n = g_api->get_vehicle_transform_json(mp_obj_get_int(a0), NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_vehicle_transform_json(mp_obj_get_int(a0), buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_vehicle_transform_json(mp_obj_get_int(a0), stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_vehicle_transform_json(mp_obj_get_int(a0), NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_vehicle_transform_json(mp_obj_get_int(a0), buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(auto_get_vehicle_transform_json_obj, auto_get_vehicle_transform_json);
 
 static mp_obj_t auto_get_vehicle_controls_json(mp_obj_t a0) {
     nodemp_require(offsetof(NodeApi, get_vehicle_controls_json), "get_vehicle_controls_json");
-    int n = g_api->get_vehicle_controls_json(mp_obj_get_int(a0), NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_vehicle_controls_json(mp_obj_get_int(a0), buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_vehicle_controls_json(mp_obj_get_int(a0), stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_vehicle_controls_json(mp_obj_get_int(a0), NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_vehicle_controls_json(mp_obj_get_int(a0), buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(auto_get_vehicle_controls_json_obj, auto_get_vehicle_controls_json);
 
 static mp_obj_t auto_get_vehicle_lock_json(mp_obj_t a0) {
     nodemp_require(offsetof(NodeApi, get_vehicle_lock_json), "get_vehicle_lock_json");
-    int n = g_api->get_vehicle_lock_json(mp_obj_get_int(a0), NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_vehicle_lock_json(mp_obj_get_int(a0), buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_vehicle_lock_json(mp_obj_get_int(a0), stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_vehicle_lock_json(mp_obj_get_int(a0), NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_vehicle_lock_json(mp_obj_get_int(a0), buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(auto_get_vehicle_lock_json_obj, auto_get_vehicle_lock_json);
@@ -805,180 +1008,264 @@ static MP_DEFINE_CONST_FUN_OBJ_3(auto_emit_others_obj, auto_emit_others);
 
 static mp_obj_t auto_get_resource_manifest_json(mp_obj_t a0) {
     nodemp_require(offsetof(NodeApi, get_resource_manifest_json), "get_resource_manifest_json");
-    int n = g_api->get_resource_manifest_json(nodemp_cstr(a0), NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_resource_manifest_json(nodemp_cstr(a0), buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_resource_manifest_json(nodemp_cstr(a0), stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_resource_manifest_json(nodemp_cstr(a0), NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_resource_manifest_json(nodemp_cstr(a0), buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(auto_get_resource_manifest_json_obj, auto_get_resource_manifest_json);
 
 static mp_obj_t auto_get_vehicle_inputs_json(mp_obj_t a0) {
     nodemp_require(offsetof(NodeApi, get_vehicle_inputs_json), "get_vehicle_inputs_json");
-    int n = g_api->get_vehicle_inputs_json(mp_obj_get_int(a0), NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_vehicle_inputs_json(mp_obj_get_int(a0), buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_vehicle_inputs_json(mp_obj_get_int(a0), stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_vehicle_inputs_json(mp_obj_get_int(a0), NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_vehicle_inputs_json(mp_obj_get_int(a0), buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(auto_get_vehicle_inputs_json_obj, auto_get_vehicle_inputs_json);
 
 static mp_obj_t auto_get_player_inputs_json(mp_obj_t a0) {
     nodemp_require(offsetof(NodeApi, get_player_inputs_json), "get_player_inputs_json");
-    int n = g_api->get_player_inputs_json(mp_obj_get_int(a0), NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_player_inputs_json(mp_obj_get_int(a0), buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_player_inputs_json(mp_obj_get_int(a0), stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_player_inputs_json(mp_obj_get_int(a0), NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_player_inputs_json(mp_obj_get_int(a0), buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(auto_get_player_inputs_json_obj, auto_get_player_inputs_json);
 
 static mp_obj_t auto_get_vehicle_nodes_json(mp_obj_t a0) {
     nodemp_require(offsetof(NodeApi, get_vehicle_nodes_json), "get_vehicle_nodes_json");
-    int n = g_api->get_vehicle_nodes_json(mp_obj_get_int(a0), NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_vehicle_nodes_json(mp_obj_get_int(a0), buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_vehicle_nodes_json(mp_obj_get_int(a0), stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_vehicle_nodes_json(mp_obj_get_int(a0), NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_vehicle_nodes_json(mp_obj_get_int(a0), buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(auto_get_vehicle_nodes_json_obj, auto_get_vehicle_nodes_json);
 
 static mp_obj_t auto_get_vehicle_break_groups_json(mp_obj_t a0) {
     nodemp_require(offsetof(NodeApi, get_vehicle_break_groups_json), "get_vehicle_break_groups_json");
-    int n = g_api->get_vehicle_break_groups_json(mp_obj_get_int(a0), NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_vehicle_break_groups_json(mp_obj_get_int(a0), buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_vehicle_break_groups_json(mp_obj_get_int(a0), stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_vehicle_break_groups_json(mp_obj_get_int(a0), NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_vehicle_break_groups_json(mp_obj_get_int(a0), buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(auto_get_vehicle_break_groups_json_obj, auto_get_vehicle_break_groups_json);
 
 static mp_obj_t auto_get_vehicle_paints_json(mp_obj_t a0) {
     nodemp_require(offsetof(NodeApi, get_vehicle_paints_json), "get_vehicle_paints_json");
-    int n = g_api->get_vehicle_paints_json(mp_obj_get_int(a0), NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_vehicle_paints_json(mp_obj_get_int(a0), buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_vehicle_paints_json(mp_obj_get_int(a0), stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_vehicle_paints_json(mp_obj_get_int(a0), NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_vehicle_paints_json(mp_obj_get_int(a0), buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(auto_get_vehicle_paints_json_obj, auto_get_vehicle_paints_json);
 
 static mp_obj_t auto_get_vehicle_sync_json(mp_obj_t a0) {
     nodemp_require(offsetof(NodeApi, get_vehicle_sync_json), "get_vehicle_sync_json");
-    int n = g_api->get_vehicle_sync_json(mp_obj_get_int(a0), NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_vehicle_sync_json(mp_obj_get_int(a0), buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_vehicle_sync_json(mp_obj_get_int(a0), stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_vehicle_sync_json(mp_obj_get_int(a0), NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_vehicle_sync_json(mp_obj_get_int(a0), buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(auto_get_vehicle_sync_json_obj, auto_get_vehicle_sync_json);
 
 static mp_obj_t auto_get_vehicle_transforms_json(void) {
     nodemp_require(offsetof(NodeApi, get_vehicle_transforms_json), "get_vehicle_transforms_json");
-    int n = g_api->get_vehicle_transforms_json(NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_vehicle_transforms_json(buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_vehicle_transforms_json(stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_vehicle_transforms_json(NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_vehicle_transforms_json(buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_0(auto_get_vehicle_transforms_json_obj, auto_get_vehicle_transforms_json);
 
 static mp_obj_t auto_get_player_focus_json(mp_obj_t a0) {
     nodemp_require(offsetof(NodeApi, get_player_focus_json), "get_player_focus_json");
-    int n = g_api->get_player_focus_json(mp_obj_get_int(a0), NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_player_focus_json(mp_obj_get_int(a0), buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_player_focus_json(mp_obj_get_int(a0), stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_player_focus_json(mp_obj_get_int(a0), NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_player_focus_json(mp_obj_get_int(a0), buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(auto_get_player_focus_json_obj, auto_get_player_focus_json);
 
 static mp_obj_t auto_get_player_head_pose_json(mp_obj_t a0) {
     nodemp_require(offsetof(NodeApi, get_player_head_pose_json), "get_player_head_pose_json");
-    int n = g_api->get_player_head_pose_json(mp_obj_get_int(a0), NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_player_head_pose_json(mp_obj_get_int(a0), buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_player_head_pose_json(mp_obj_get_int(a0), stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_player_head_pose_json(mp_obj_get_int(a0), NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_player_head_pose_json(mp_obj_get_int(a0), buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(auto_get_player_head_pose_json_obj, auto_get_player_head_pose_json);
 
 static mp_obj_t auto_get_player_camera_json(mp_obj_t a0) {
     nodemp_require(offsetof(NodeApi, get_player_camera_json), "get_player_camera_json");
-    int n = g_api->get_player_camera_json(mp_obj_get_int(a0), NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_player_camera_json(mp_obj_get_int(a0), buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_player_camera_json(mp_obj_get_int(a0), stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_player_camera_json(mp_obj_get_int(a0), NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_player_camera_json(mp_obj_get_int(a0), buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(auto_get_player_camera_json_obj, auto_get_player_camera_json);
 
 static mp_obj_t auto_get_player_session_json(mp_obj_t a0) {
     nodemp_require(offsetof(NodeApi, get_player_session_json), "get_player_session_json");
-    int n = g_api->get_player_session_json(mp_obj_get_int(a0), NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_player_session_json(mp_obj_get_int(a0), buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_player_session_json(mp_obj_get_int(a0), stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_player_session_json(mp_obj_get_int(a0), NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_player_session_json(mp_obj_get_int(a0), buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(auto_get_player_session_json_obj, auto_get_player_session_json);
@@ -1027,15 +1314,22 @@ static MP_DEFINE_CONST_FUN_OBJ_1(auto_release_vehicle_lock_obj, auto_release_veh
 
 static mp_obj_t auto_get_player_policy_json(mp_obj_t a0) {
     nodemp_require(offsetof(NodeApi, get_player_policy_json), "get_player_policy_json");
-    int n = g_api->get_player_policy_json(mp_obj_get_int(a0), NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_player_policy_json(mp_obj_get_int(a0), buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_player_policy_json(mp_obj_get_int(a0), stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_player_policy_json(mp_obj_get_int(a0), NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_player_policy_json(mp_obj_get_int(a0), buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(auto_get_player_policy_json_obj, auto_get_player_policy_json);
@@ -1054,60 +1348,88 @@ static MP_DEFINE_CONST_FUN_OBJ_3(auto_spawn_vehicle_for_player_obj, auto_spawn_v
 
 static mp_obj_t auto_get_memory_json(void) {
     nodemp_require(offsetof(NodeApi, get_memory_json), "get_memory_json");
-    int n = g_api->get_memory_json(NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_memory_json(buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_memory_json(stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_memory_json(NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_memory_json(buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_0(auto_get_memory_json_obj, auto_get_memory_json);
 
 static mp_obj_t auto_get_platform_json(void) {
     nodemp_require(offsetof(NodeApi, get_platform_json), "get_platform_json");
-    int n = g_api->get_platform_json(NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_platform_json(buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_platform_json(stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_platform_json(NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_platform_json(buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_0(auto_get_platform_json_obj, auto_get_platform_json);
 
 static mp_obj_t auto_get_handler_stats_json(mp_obj_t a0) {
     nodemp_require(offsetof(NodeApi, get_handler_stats_json), "get_handler_stats_json");
-    int n = g_api->get_handler_stats_json(mp_obj_get_int(a0), NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_handler_stats_json(mp_obj_get_int(a0), buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_handler_stats_json(mp_obj_get_int(a0), stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_handler_stats_json(mp_obj_get_int(a0), NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_handler_stats_json(mp_obj_get_int(a0), buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(auto_get_handler_stats_json_obj, auto_get_handler_stats_json);
 
 static mp_obj_t auto_get_vehicle_transforms_select_json(mp_obj_t a0) {
     nodemp_require(offsetof(NodeApi, get_vehicle_transforms_select_json), "get_vehicle_transforms_select_json");
-    int n = g_api->get_vehicle_transforms_select_json(nodemp_cstr(a0), NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_vehicle_transforms_select_json(nodemp_cstr(a0), buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_vehicle_transforms_select_json(nodemp_cstr(a0), stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_vehicle_transforms_select_json(nodemp_cstr(a0), NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_vehicle_transforms_select_json(nodemp_cstr(a0), buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(auto_get_vehicle_transforms_select_json_obj, auto_get_vehicle_transforms_select_json);
@@ -1174,15 +1496,22 @@ static MP_DEFINE_CONST_FUN_OBJ_1(auto_apply_scheduled_vehicles_obj, auto_apply_s
 
 static mp_obj_t auto_get_queue_json(void) {
     nodemp_require(offsetof(NodeApi, get_queue_json), "get_queue_json");
-    int n = g_api->get_queue_json(NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_queue_json(buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_queue_json(stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_queue_json(NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_queue_json(buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_0(auto_get_queue_json_obj, auto_get_queue_json);
@@ -1213,15 +1542,22 @@ static MP_DEFINE_CONST_FUN_OBJ_2(auto_queue_pause_obj, auto_queue_pause);
 
 static mp_obj_t auto_get_queue_limits_json(void) {
     nodemp_require(offsetof(NodeApi, get_queue_limits_json), "get_queue_limits_json");
-    int n = g_api->get_queue_limits_json(NULL, 0);
-    if (n < 0) return mp_const_none;
-    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
-    char *buf = malloc((size_t)n + 1);
-    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
-    int written = g_api->get_queue_limits_json(buf, n + 1);
-    if (written < 0) { free(buf); return mp_const_none; }
-    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);
-    free(buf);
+    char stack[512];
+    char *buf = stack;
+    int owned = 0;
+    int n = g_api->get_queue_limits_json(stack, (int)sizeof stack);
+    if (n < 0) {
+        n = g_api->get_queue_limits_json(NULL, 0);
+        if (n < 0) return mp_const_none;
+        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("text result is too large"));
+        buf = malloc((size_t)n + 1);
+        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("out of memory"));
+        owned = 1;
+        n = g_api->get_queue_limits_json(buf, n + 1);
+        if (n < 0) { free(buf); return mp_const_none; }
+    }
+    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);
+    if (owned) free(buf);
     return text;
 }
 static MP_DEFINE_CONST_FUN_OBJ_0(auto_get_queue_limits_json_obj, auto_get_queue_limits_json);

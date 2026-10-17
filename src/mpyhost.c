@@ -156,6 +156,22 @@ static void q_wait(void) {
 #endif
 }
 
+static int q_wait_ms(unsigned ms) {
+#if defined(_WIN32)
+    return SleepConditionVariableCS(&g_cv, &g_mu, ms) ? 1 : 0;
+#else
+    struct timespec ts;
+    clock_gettime(CLOCK_REALTIME, &ts);
+    ts.tv_sec += (time_t)(ms / 1000u);
+    ts.tv_nsec += (long)(ms % 1000u) * 1000000L;
+    if (ts.tv_nsec >= 1000000000L) {
+        ts.tv_sec += 1;
+        ts.tv_nsec -= 1000000000L;
+    }
+    return pthread_cond_timedwait(&g_cv, &g_mu, &ts) == 0;
+#endif
+}
+
 static void q_broadcast(void) {
 #if defined(_WIN32)
     WakeAllConditionVariable(&g_cv);
@@ -313,11 +329,6 @@ static void core_reserve(void) {
 
 void nodemp_reserve_now(void) { core_reserve(); }
 
-static void reserve_timer(int timer_id, void *user) {
-    (void)timer_id;
-    (void)user;
-    core_reserve();
-}
 
 int nodemp_enqueue(int slot) {
     Job *job;
@@ -360,7 +371,12 @@ static void lane_body(void) {
     for (;;) {
         Job *job;
         int stopping;
-        while (!STOP_GET() && g_head == NULL) q_wait();
+        while (!STOP_GET() && g_head == NULL) {
+            if (q_wait_ms(5000)) continue;
+            q_unlock();
+            core_reserve();
+            q_lock();
+        }
         if (g_head == NULL) {
             q_unlock();
             return;
@@ -429,7 +445,9 @@ static int choose_core(void) {
     char buf[180];
     if (g_ncpu < 1) g_ncpu = 1;
     if (env && (strcmp(env, "off") == 0 || strcmp(env, "any") == 0)) return -1;
-    if (!env || !env[0] || strcmp(env, "last") == 0) return g_ncpu <= 1 ? -1 : g_ncpu - 1;
+    if (env && strcmp(env, "last") == 0) return g_ncpu <= 1 ? -1 : g_ncpu - 1;
+    /* Python takes the last core. Use the one before it unless asked otherwise. */
+    if (!env || !env[0]) return g_ncpu <= 1 ? -1 : (g_ncpu > 2 ? g_ncpu - 2 : g_ncpu - 1);
     value = strtol(env, &end, 10);
     if (end == env || *end != '\0' || value < 0 || value >= g_ncpu) {
         snprintf(buf, sizeof buf, "NODEMP_MPY_CORE=%s is not a core on this machine; using the last core", env);
@@ -661,7 +679,6 @@ NODE_EXPORT int node_plugin_init(const NodeApi *api) {
         shutdown_vm();
         return -1;
     }
-    if (api->set_interval) api->set_interval(5000u, reserve_timer, NULL);
     if (g_core < 0) {
         snprintf(banner, sizeof banner,
             "resources with type = \"micropython\" run on MicroPython " MICROPY_GIT_TAG "; background lane is not pinned");

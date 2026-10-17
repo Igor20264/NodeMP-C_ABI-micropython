@@ -86,17 +86,23 @@ def emit_function(fn: dict, lines: list[str]) -> None:
     converted = ", ".join(c_arg(p["kind"], i) for i, p in enumerate(prefix))
     call_args = converted
     if fn["auto"] == "text":
-        query = f"g_api->{name}({call_args}{', ' if call_args else ''}NULL, 0)"
-        fill = f"g_api->{name}({call_args}{', ' if call_args else ''}buf, n + 1)"
-        lines.append(f"    int n = {query};")
-        lines.append("    if (n < 0) return mp_const_none;")
-        lines.append("    if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT(\"text result is too large\"));")
-        lines.append("    char *buf = malloc((size_t)n + 1);")
-        lines.append("    if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT(\"out of memory\"));")
-        lines.append(f"    int written = {fill};")
-        lines.append("    if (written < 0) { free(buf); return mp_const_none; }")
-        lines.append("    mp_obj_t text = mp_obj_new_str(buf, (size_t)written);")
-        lines.append("    free(buf);")
+        call = f"g_api->{name}({call_args}{', ' if call_args else ''}"
+        lines.append("    char stack[512];")
+        lines.append("    char *buf = stack;")
+        lines.append("    int owned = 0;")
+        lines.append(f"    int n = {call}stack, (int)sizeof stack);")
+        lines.append("    if (n < 0) {")
+        lines.append(f"        n = {call}NULL, 0);")
+        lines.append("        if (n < 0) return mp_const_none;")
+        lines.append("        if (n > 8388608) mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT(\"text result is too large\"));")
+        lines.append("        buf = malloc((size_t)n + 1);")
+        lines.append("        if (!buf) mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT(\"out of memory\"));")
+        lines.append("        owned = 1;")
+        lines.append(f"        n = {call}buf, n + 1);")
+        lines.append("        if (n < 0) { free(buf); return mp_const_none; }")
+        lines.append("    }")
+        lines.append("    mp_obj_t text = mp_obj_new_str(buf, (size_t)n);")
+        lines.append("    if (owned) free(buf);")
         lines.append("    return text;")
     else:
         call = f"g_api->{name}({call_args})"
