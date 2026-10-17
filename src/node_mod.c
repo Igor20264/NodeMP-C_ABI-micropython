@@ -48,7 +48,7 @@ static qstr g_q_trusted;
 static const char *const REQUESTS[] = {
     "playerConnectRequest", "vehicleSpawnRequest", "vehicleEnterRequest", "vehicleExitRequest",
     "vehicleCouplerRequest", "vehicleEditRequest", "vehiclePaintRequest", "vehicleTriggerRequest",
-    "vehicleNodeGrabRequest", "queueJoinRequest", "queueAdmitRequest", NULL,
+    "vehicleNodeGrabRequest", "queueJoinRequest", "queueAdmitRequest", "chatMessageRequest", NULL,
 };
 
 static const char *const VEHICLE[] = {
