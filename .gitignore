@@ -1,0 +1,10 @@
+third_party/
+build/
+build-embed/
+micropython_embed/
+__pycache__/
+*.o
+*.dll
+*.a
+*.exp
+*.lib

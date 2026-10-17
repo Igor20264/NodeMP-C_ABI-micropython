@@ -1,0 +1,10 @@
+name = "micropython-gate"
+version = "1.0"
+type = "micropython"
+
+# Те же запреты, что у python-gate, на MicroPython. Сумма при входе считается
+# на закреплённом ядре. Скопируйте всю папку в resources/. В modules/ нужен
+# mpyhost.dll. Без него сервер пропустит тип "micropython".
+
+[server]
+main = "server/main.py"
